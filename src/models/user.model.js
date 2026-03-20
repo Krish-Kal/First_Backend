@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema({
         trim:true,
         index:true
     },
-    avtar:{
+    avatar:{
         type:String, //cloudnary url,
         required:true
     },
@@ -50,15 +50,21 @@ const userSchema = new mongoose.Schema({
 },{
     timestamps:true
 })
+
+// hashing password only when password is modified
 userSchema.pre("save", async function (next) {
     if(!this.isModified("password")) return next();
     this.password = await bcrypt.hash(this.password, 10)
     next()
 })
+
+// creating a method to compare password 
 userSchema.methods.isPasswordCorrect = async function(password)
 {
    return await bcrypt.compare(password, this.password)
 }
+
+// creating a method to generate access token
 userSchema.methods.generateAccessToken = function()
 {
   return jwt.sign(
@@ -74,6 +80,8 @@ userSchema.methods.generateAccessToken = function()
   }
 )
 }
+
+// creating a method to generate refresh token
 userSchema.methods.generateRefreshToken = function()
 {
 return jwt.sign(
